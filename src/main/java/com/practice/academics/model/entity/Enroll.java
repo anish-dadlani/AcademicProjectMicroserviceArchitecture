@@ -1,8 +1,8 @@
-package practice.enroll;
+package com.practice.academics.model.entity;
 
+import com.practice.academics.model.entity.Course;
 import jakarta.persistence.*;
-import practice.course.Course;
-import practice.student.Student;
+import com.practice.academics.model.entity.Student;
 
 import java.time.LocalDateTime;
 

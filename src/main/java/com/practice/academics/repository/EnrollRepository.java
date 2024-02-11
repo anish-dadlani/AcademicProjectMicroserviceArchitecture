@@ -1,10 +1,10 @@
-package practice.enroll;
+package com.practice.academics.repository;
 
+import com.practice.academics.model.entity.Course;
+import com.practice.academics.model.entity.Enroll;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-import practice.course.Course;
-import practice.student.Student;
+import com.practice.academics.model.entity.Student;
 
 import java.util.List;
 import java.util.Optional;

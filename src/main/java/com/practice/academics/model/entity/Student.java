@@ -1,4 +1,4 @@
-package practice.student;
+package com.practice.academics.model.entity;
 
 import jakarta.persistence.*;
 

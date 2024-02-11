@@ -1,5 +1,7 @@
-package practice.course;
+package com.practice.academics.controller;
 
+import com.practice.academics.service.CourseService;
+import com.practice.academics.model.entity.Course;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

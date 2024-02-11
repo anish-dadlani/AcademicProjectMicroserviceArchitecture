@@ -1,11 +1,13 @@
-package practice.enroll;
+package com.practice.academics.service;
 
+import com.practice.academics.model.entity.Course;
+import com.practice.academics.model.entity.Enroll;
+import com.practice.academics.repository.CourseRepository;
+import com.practice.academics.repository.EnrollRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import practice.course.Course;
-import practice.course.CourseRepository;
-import practice.student.Student;
-import practice.student.StudentRepository;
+import com.practice.academics.model.entity.Student;
+import com.practice.academics.repository.StudentRepository;
 import java.util.List;
 
 @Service

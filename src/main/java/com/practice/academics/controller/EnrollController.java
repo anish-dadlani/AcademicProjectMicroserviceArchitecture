@@ -1,5 +1,7 @@
-package practice.enroll;
+package com.practice.academics.controller;
 
+import com.practice.academics.service.EnrollService;
+import com.practice.academics.model.entity.Enroll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
