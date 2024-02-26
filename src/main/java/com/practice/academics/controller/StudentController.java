@@ -1,8 +1,12 @@
 package com.practice.academics.controller;
 
+import com.practice.academics.mapper.StudentMapper;
+import com.practice.academics.model.dto.request.StudentRequestDto;
+import com.practice.academics.model.dto.response.StudentResponseDto;
 import com.practice.academics.model.entity.Student;
 import com.practice.academics.service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,24 +21,29 @@ public class StudentController {
     }
 
     @GetMapping
-    public List<Student> getStudents(){
-        return studentService.getStudents();
+    public ResponseEntity<List<StudentResponseDto>> getStudents() {
+        List<StudentResponseDto> studentResponseDto = studentService.getStudents();
+        return ResponseEntity.ok().body(studentResponseDto);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<StudentResponseDto> getStudentById(@PathVariable Long id) {
+        Student student = studentService.getStudentById(id);
+        return ResponseEntity.ok(StudentMapper.toStudentDto(student));
     }
 
     @PostMapping
-    public void registerNewStudent(@RequestBody Student student){
-        studentService.addNewStudent(student);
+    public ResponseEntity<StudentResponseDto> addStudent(@RequestBody StudentRequestDto studentRequestDto) {
+        return studentService.addStudent(studentRequestDto);
     }
 
     @DeleteMapping(path = "{studentId}")
-    public void deleteStudent(@PathVariable("studentId") Long studentId){
-        studentService.deleteStudent(studentId);
+    public ResponseEntity<String> deleteStudent(@PathVariable("studentId") Long studentId){
+        return studentService.deleteStudent(studentId);
     }
-
     @PutMapping(path = "{studentId}")
-    public void updateStudent(@PathVariable("studentId") Long studentId,
-                                @RequestParam(required = false) String name,
-                                @RequestParam(required = false) String email){
-        studentService.updateStudent(studentId, name, email);
+    public ResponseEntity<String> updateStudent(@PathVariable("studentId") Long studentId,
+                                                @RequestBody StudentRequestDto studentRequestDto) {
+        return studentService.updateStudent(studentId, studentRequestDto);
     }
 }

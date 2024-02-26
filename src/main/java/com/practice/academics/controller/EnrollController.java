@@ -1,11 +1,12 @@
 package com.practice.academics.controller;
 
+import com.practice.academics.model.dto.request.EnrollRequestDto;
 import com.practice.academics.service.EnrollService;
-import com.practice.academics.model.entity.Enroll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping(path = "api/v1/enroll")
@@ -16,15 +17,15 @@ public class EnrollController {
         this.enrollService = enrollService;
     }
 
-    @GetMapping
-    public ResponseEntity<List<Enroll>> getCoursesWithStudents() {
-        List<Enroll> courseStudentList = enrollService.getCoursesWithStudents();
-        return ResponseEntity.ok(courseStudentList);
+    @GetMapping("/courses")
+    public ResponseEntity<List<Map<String, Object>>> getCoursesWithStudents(@RequestParam(required = false) Long courseId) {
+        List<Map<String, Object>> coursesWithStudents = enrollService.getCoursesWithStudents(courseId);
+        return ResponseEntity.ok(coursesWithStudents);
     }
 
     @PostMapping
-    public ResponseEntity<String> registerForCourse(@RequestParam Long studentId, @RequestParam Long courseId) {
-        enrollService.enrollStudentIntoCourse(studentId, courseId);
-        return ResponseEntity.ok("Registration successful.");
+    public ResponseEntity<String> registerForCourse(@RequestBody EnrollRequestDto enrollRequestDto) {
+        enrollService.enrollStudentIntoCourse(enrollRequestDto);
+        return ResponseEntity.ok("Student registered for the course successfully.");
     }
 }

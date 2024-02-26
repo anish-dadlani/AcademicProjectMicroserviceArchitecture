@@ -1,8 +1,12 @@
 package com.practice.academics.controller;
 
+import com.practice.academics.mapper.CourseMapper;
+import com.practice.academics.model.dto.request.CourseRequestDto;
+import com.practice.academics.model.dto.response.CourseResponseDto;
 import com.practice.academics.service.CourseService;
 import com.practice.academics.model.entity.Course;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,22 +21,30 @@ public class CourseController {
     }
 
     @GetMapping
-    public List<Course> getCourses(){
-        return courseService.getCourses();
+    public ResponseEntity<List<CourseResponseDto>> getCourses(){
+        List<CourseResponseDto> courses = courseService.getCourses();
+        return ResponseEntity.ok(courses);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<CourseResponseDto> getCourseById(@PathVariable Long id) {
+        Course course = courseService.getCourseById(id);
+        return ResponseEntity.ok(CourseMapper.toCourseDto(course));
     }
 
     @PostMapping
-    public void addCourse(@RequestBody Course course){ courseService.addCourse(course); }
+    public ResponseEntity<CourseResponseDto> addCourse(@RequestBody CourseRequestDto courseRequestDto) {
+        return courseService.addCourse(courseRequestDto);
+    }
 
     @DeleteMapping(path = "{courseId}")
-    public void deleteCourse(@PathVariable("courseId") Long courseId){
-        courseService.deleteCourse(courseId);
+    public ResponseEntity<String> deleteCourse(@PathVariable("courseId") Long courseId){
+        return courseService.deleteCourse(courseId);
     }
 
     @PutMapping(path = "{courseId}")
-    public void updateCourse(@PathVariable("courseId") Long courseId,
-                                @RequestParam(required = false) String courseName,
-                                @RequestParam(required = false) String courseCode){
-        courseService.updateCourse(courseId, courseName, courseCode);
+    public ResponseEntity<String> updateCourse(@PathVariable("courseId") Long courseId,
+                                             @RequestBody CourseRequestDto courseRequestDto) {
+        return courseService.updateCourse(courseId, courseRequestDto);
     }
 }
