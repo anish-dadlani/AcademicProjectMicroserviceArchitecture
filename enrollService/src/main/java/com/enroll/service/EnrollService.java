@@ -1,8 +1,11 @@
 package com.enroll.service;
 
+import com.enroll.mapper.EnrollMapper;
+import com.enroll.model.dto.request.EnrollRequestDto;
 import com.enroll.model.entity.Enroll;
 import com.enroll.repository.EnrollRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -16,6 +19,9 @@ import java.util.*;
 public class EnrollService {
     private final EnrollRepository enrollRepository;
 
+    @Value("${apigateway.service.url}")
+    private String apigatewayServiceUrl;
+
     @Autowired
     private RestTemplate restTemplate;
 
@@ -24,77 +30,80 @@ public class EnrollService {
         this.enrollRepository = enrollRepository;
     }
 
-//    public void enrollStudentIntoCourse(EnrollRequestDto enrollRequestDto) {
-//        Enroll enroll = EnrollMapper.toEnroll(enrollRequestDto);
-//
-//        Student student = enroll.getStudent();
-//        if (studentRepository.findById(student.getId()).isEmpty()) {
-//            throw new IllegalArgumentException("Student not found with ID: " + student.getId());
-//        }
-//
-//        Course course = enroll.getCourse();
-//        if (courseRepository.findById(course.getId()).isEmpty()) {
-//            throw new IllegalArgumentException("Course not found with ID: " + course.getId());
-//        }
-//
-//        if (enrollRepository.findByStudentAndCourse(student, course).isPresent()) {
-//            throw new IllegalStateException("Student is already registered for the course.");
-//        }
-//
-//        enrollRepository.save(enroll);
-//    }
+    public void enrollStudentIntoCourse(EnrollRequestDto enrollRequestDto) {
+        Enroll enroll = EnrollMapper.toEnroll(enrollRequestDto);
+        System.out.println(enroll);
+        // API Gateway URLs
+        String studentApiUrl = apigatewayServiceUrl + "/students/";
+        String courseApiUrl = apigatewayServiceUrl + "/courses/";
 
-//    public List<Map<String, Object>> getCoursesWithStudents(Long courseId) {
-//        List<Map<String, Object>> coursesWithStudents = new ArrayList<>();
-//
-//        List<Map<String, Object>> courses;
-//        if (courseId != null) {
-//            return restTemplate.getForObject("http://localhost:8084/api/v1/courses/"+courseId, ArrayList.class);
-////            courses = Collections.singletonList(courseClient.getCourseById(courseId)
-////                    .orElseThrow(() -> new IllegalArgumentException("Course not found with ID: " + courseId)));
-//        } else throw new UnsupportedOperationException("Fetching all courses without ID is not supported");
+        Map<String, Object> studentInfo = fetchInfo(studentApiUrl, enrollRequestDto.getStudent_id());
+        if (studentInfo == null) throw new IllegalArgumentException("Student not found with ID: " + enrollRequestDto.getStudent_id());
 
-//        for (Map<String, Object> courseMap : courses) {
-//            List<Enroll> enrollments = enrollRepository.findByCourse_id((Long) courseMap.get("id"));
-//            List<Map<String, Object>> studentsList = new ArrayList<>();
-//
-//            for (Enroll enroll : enrollments) {
-//                Map<String, Object> studentInfo = new HashMap<>();
-////                studentInfo.put("id", enroll.getStudent().getId());
-////                studentInfo.put("name", enroll.getStudent().getName());
-//                studentInfo.put("registrationDate", enroll.getRegistrationDate());
-//                studentsList.add(studentInfo);
-//            }
-//
-//            Map<String, Object> courseWithStudents = new HashMap<>();
-////            courseWithStudents.put("courseName", course.getCourseName());
-//            courseWithStudents.put("studentsRegistered", studentsList);
-//
-//            coursesWithStudents.add(courseWithStudents);
-//        }
+        Map<String, Object> courseInfo = fetchInfo(courseApiUrl, enrollRequestDto.getCourse_id());
+        if (courseInfo == null) throw new IllegalArgumentException("Course not found with ID: " + enrollRequestDto.getCourse_id());
 
-//        return forObject;
-//    }
-
-    public List<Map<String, Object>> getCoursesWithStudents(Long courseId) {
-        List<Map<String, Object>> coursesWithStudents = new ArrayList<>();
-
-        if (courseId != null) {
-            ResponseEntity<List<Map<String, Object>>> responseEntity = restTemplate.exchange(
-                    "http://localhost:8084/api/v1/courses/" + courseId,
-                    HttpMethod.GET,
-                    null,
-                    new ParameterizedTypeReference<List<Map<String, Object>>>() {});
-
-            if (responseEntity.getStatusCode() == HttpStatus.OK) {
-                coursesWithStudents = responseEntity.getBody();
-            } else {
-                throw new IllegalStateException("Failed to fetch courses with students. Status code: " + responseEntity.getStatusCodeValue());
-            }
-        } else {
-            throw new UnsupportedOperationException("Fetching all courses without ID is not supported");
+        if (enrollRepository.findByStudent_idAndCourse_id(
+                enrollRequestDto.getStudent_id(),
+                enrollRequestDto.getCourse_id()).isPresent()) {
+            throw new IllegalStateException("Student is already registered for the course.");
         }
 
-        return coursesWithStudents;
+        enrollRepository.save(enroll);
+    }
+
+    public List<Map<String, Object>> getStudentEnrollmentsByCourseId(Long courseId) {
+        List<Map<String, Object>> studentEnrollments = new ArrayList<>();
+        List<Map<String, Object>> students = new ArrayList<>();
+
+        // API Gateway URLs
+        String studentApiUrl = apigatewayServiceUrl + "/students/";
+        String courseApiUrl = apigatewayServiceUrl + "/courses/";
+
+        try {
+            // Validate course ID (assuming non-zero positive value is valid)
+            if (courseId == null || courseId <= 0) {
+                throw new IllegalArgumentException("Invalid course ID. Please provide a valid course Id.");
+            }
+
+            // Fetch course information first
+            Map<String, Object> courseInfo = fetchInfo(courseApiUrl, courseId);
+
+            List<Enroll> enrolls = enrollRepository.findByCourse_id(courseId);
+
+            for (Enroll enroll : enrolls) {
+                // Fetch information of the enrolled student
+                Map<String, Object> studentInfo = fetchInfo(studentApiUrl, enroll.getStudent_id());
+
+                // Structure student enrollment information
+                Map<String, Object> studentEnrollment = new HashMap<>();
+                studentInfo.put("registrationDate", enroll.getRegistrationDate());
+                students.add(studentInfo);
+            }
+
+            // Structure final response with course info once and list of students
+            Map<String, Object> finalResponse = new HashMap<>();
+            finalResponse.put("course_info", courseInfo);
+            finalResponse.put("students", students);
+
+            studentEnrollments.add(finalResponse);
+        } catch (ClassCastException e) {
+            System.out.println("Unexpected response format: " + e.getMessage());
+        }
+        return studentEnrollments;
+    }
+
+    private Map<String, Object> fetchInfo(String apiUrl, Long Id) {
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                apiUrl + Id,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<Map<String, Object>>() {});
+
+        if (response.getStatusCode() == HttpStatus.OK) {
+            return response.getBody();
+        } else {
+            throw new IllegalStateException("Failed to fetch response. Status code: " + response.getStatusCode());
+        }
     }
 }

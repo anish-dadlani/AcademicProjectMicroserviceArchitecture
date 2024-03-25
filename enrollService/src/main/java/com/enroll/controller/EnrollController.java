@@ -18,8 +18,8 @@ public class EnrollController {
     }
 
     @GetMapping("/courses")
-    public ResponseEntity<List<Map<String, Object>>> getCoursesWithStudents(@RequestParam(required = false) Long courseId) {
-        List<Map<String, Object>> coursesWithStudents = enrollService.getCoursesWithStudents(courseId);
+    public ResponseEntity<List<Map<String, Object>>> getStudentEnrollmentsByCourseId(@RequestParam(required = false) Long courseId) {
+        List<Map<String, Object>> coursesWithStudents = enrollService.getStudentEnrollmentsByCourseId(courseId);
         return ResponseEntity.ok(coursesWithStudents);
     }
 
