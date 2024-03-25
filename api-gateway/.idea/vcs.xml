@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../courseService" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../enrollService" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../eureka-server" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../studentService" vcs="Git" />
+  </component>
+</project>
