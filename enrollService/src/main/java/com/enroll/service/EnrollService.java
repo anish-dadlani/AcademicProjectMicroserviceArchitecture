@@ -32,7 +32,7 @@ public class EnrollService {
 
     public void enrollStudentIntoCourse(EnrollRequestDto enrollRequestDto) {
         Enroll enroll = EnrollMapper.toEnroll(enrollRequestDto);
-        System.out.println(enroll);
+        System.out.println("enroll"+enroll);
         // API Gateway URLs
         String studentApiUrl = apigatewayServiceUrl + "/students/";
         String courseApiUrl = apigatewayServiceUrl + "/courses/";
@@ -61,7 +61,7 @@ public class EnrollService {
         String courseApiUrl = apigatewayServiceUrl + "/courses/";
 
         try {
-            // Validate course ID (assuming non-zero positive value is valid)
+            // Validate course ID
             if (courseId == null || courseId <= 0) {
                 throw new IllegalArgumentException("Invalid course ID. Please provide a valid course Id.");
             }
