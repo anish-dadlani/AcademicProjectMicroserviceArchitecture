@@ -15,7 +15,6 @@ import java.util.*;
 public class EnrollService {
     private final EnrollRepository enrollRepository;
     private final CourseService courseService;
-
     private final StudentService studentService;
 
     @Autowired
@@ -27,8 +26,6 @@ public class EnrollService {
 
     public void enrollStudentIntoCourse(EnrollRequestDto enrollRequestDto) {
         Enroll enroll = EnrollMapper.toEnroll(enrollRequestDto);
-        System.out.println("enroll"+enroll);
-
 
         Map<String, Object> studentInfo = studentService.getStudentById(enrollRequestDto.getStudent_id())
             .orElseThrow(() -> new IllegalStateException("Student not found with id: " + enrollRequestDto.getStudent_id()));
